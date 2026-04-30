@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algorithmic Confessional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&family=Courier+Prime&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #060402; }
+
+/* ─── SVG FILTERS (木纹/噪点) ─────────────── */
+#svg-filters { position: absolute; width: 0; height: 0; }
+
+/* ─── SCENE ROOT ─────────────────────────── */
+#scene {
+  width: 100vw; height: 100vh;
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ─── LAYER 1: DEEP STONE WALL ────────────── */
+#layer-bg {
+  position: absolute; inset: 0;
+  background: #0c0804;
+}
+
+/* 石块砌墙效果：用多层gradient模拟石砖缝 */
+#layer-stone {
+  position: absolute; inset: 0;
+  /* 横向砖缝 */
+  background-image:
+    /* 砖缝横线 */
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 54px,
+      rgba(0,0,0,0.55) 54px, rgba(0,0,0,0.55) 58px
+    ),
+    /* 偏移竖缝（奇数行） */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px, transparent 88px,
+      rgba(0,0,0,0.4) 88px, rgba(0,0,0,0.4) 91px
+    ),
+    /* 石块基底色：深褐渐变 */
+    linear-gradient(160deg,
+      #1c1408 0%, #140e06 30%,
+      #1a1208 55%, #0e0a04 80%,
+      #161008 100%
+    );
+  /* 石块表面凹凸感：用inset shadow叠加噪点 */
+  filter: url(#stone-noise);
+}
+
+/* 石墙深度阴影 — 中央凹陷感 */
+#layer-stone::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 50% 50%,
+      transparent 30%, rgba(0,0,0,0.45) 100%),
+    radial-gradient(ellipse 100% 40% at 50% 0%,
+      rgba(0,0,0,0.6) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 30% at 50% 100%,
+      rgba(0,0,0,0.7) 0%, transparent 60%);
+}
+
+/* ─── LAYER 2: BOOTH FRAME ────────────────── */
+#layer-booth {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+
+/* ─── BOOTH SIDES — 深色橡木质感 ─────────── */
+.booth-side {
+  position: absolute; top: 0; bottom: 0; width: 19vw;
+  /* 多层叠加木纹 */
+  background:
+    /* 高光边缘 */
+    linear-gradient(90deg,
+      rgba(255,200,80,0.08) 0px, transparent 3px,
+      transparent calc(100% - 3px), rgba(255,200,80,0.05) 100%
+    ),
+    /* 木纹竖向纤维 */
+    repeating-linear-gradient(
+      178deg,
+      transparent 0px, transparent 6px,
+      rgba(255,180,40,0.028) 6px, rgba(255,180,40,0.028) 7px,
+      transparent 7px, transparent 14px,
+      rgba(180,100,20,0.02) 14px, rgba(180,100,20,0.02) 15px
+    ),
+    repeating-linear-gradient(
+      176deg,
+      transparent 0px, transparent 22px,
+      rgba(120,60,10,0.035) 22px, rgba(120,60,10,0.035) 24px
+    ),
+    /* 木材基础色：深棕渐变带年轮感 */
+    linear-gradient(170deg,
+      #2e2008 0%, #201608 20%,
+      #2a1c0a 40%, #181006 60%,
+      #241a08 80%, #1a1206 100%
+    );
+  border-top: 1px solid rgba(200,150,50,0.18);
+  border-bottom: 1px solid rgba(0,0,0,0.6);
+  filter: url(#wood-noise);
+}
+.booth-side.left {
+  left: 0;
+  border-right: 2px solid rgba(180,130,40,0.22);
+  box-shadow: inset -8px 0 20px rgba(0,0,0,0.5), 8px 0 30px rgba(0,0,0,0.4);
+}
+.booth-side.right {
+  right: 0;
+  border-left: 2px solid rgba(180,130,40,0.22);
+  box-shadow: inset 8px 0 20px rgba(0,0,0,0.5), -8px 0 30px rgba(0,0,0,0.4);
+}
+
+/* 木纹高光条纹 */
+.booth-side::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    172deg,
+    transparent 0px, transparent 40px,
+    rgba(255,220,100,0.022) 40px, rgba(255,220,100,0.022) 41px,
+    transparent 41px, transparent 80px,
+    rgba(255,200,80,0.015) 80px, rgba(255,200,80,0.015) 81px
+  );
+}
+
+/* 木板底部横纹（年轮截面感） */
+.booth-side::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
+  );
+  opacity: 0.3;
+}
+
+/* ─── GOTHIC ARCH TOP ─────────────────────── */
+.booth-arch {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 62vw; height: 14vh;
+  background:
+    linear-gradient(180deg,
+      #1e1408 0%, #181006 50%, transparent 100%
+    );
+  border-radius: 0 0 50% 50% / 0 0 120% 120%;
+  border-left:   2px solid rgba(180,130,40,0.2);
+  border-right:  2px solid rgba(180,130,40,0.2);
+  border-bottom: 1px solid rgba(180,130,40,0.08);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+
+/* arch 内侧装饰线 */
+.booth-arch::before {
+  content: '';
+  position: absolute;
+  top: 4px; left: 4px; right: 4px; bottom: 4px;
+  border-radius: 0 0 50% 50% / 0 0 120% 120%;
+  border-left:   1px solid rgba(180,130,40,0.08);
+  border-right:  1px solid rgba(180,130,40,0.08);
+  border-bottom: 1px solid rgba(180,130,40,0.05);
+}
+
+/* ─── LATTICE PANELS ──────────────────────── */
+.booth-lattice {
+  position: absolute; top: 14vh; bottom: 0;
+  width: 5vw;
+  display: flex; flex-direction: column; gap: 0;
+}
+.booth-lattice.left  { left: 19vw; }
+.booth-lattice.right { right: 19vw; }
+
+.lattice-bar {
+  flex: 1;
+  background: linear-gradient(90deg,
+    #221808 0%, #2e2210 30%, #382a12 50%, #2e2210 70%, #1c1406 100%
+  );
+  margin: 4px 0;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,200,80,0.12),
+    inset 0 -1px 0 rgba(0,0,0,0.5),
+    1px 0 3px rgba(0,0,0,0.4),
+    -1px 0 3px rgba(0,0,0,0.4);
+}
+.booth-lattice::before, .booth-lattice::after {
+  content: '';
+  position: absolute; left: -3px; right: -3px; height: 8px;
+  background: linear-gradient(180deg, #3a2a10, #2a1e08, #1a1206);
+  border-radius: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  z-index: 2;
+}
+.booth-lattice::before { top: 25%; }
+.booth-lattice::after  { top: 65%; }
+
+/* ─── CANDLE SCONCES ──────────────────────── */
+.sconce {
+  position: absolute; top: 17vh;
+  width: 32px;
+  display: flex; flex-direction: column; align-items: center;
+  z-index: 6;
+}
+.sconce.left  { left: 13.5vw; }
+.sconce.right { right: 13.5vw; }
+
+/* sconce bracket (wall mount) */
+.sconce-bracket {
+  width: 18px; height: 10px;
+  background: linear-gradient(180deg, #3a2a10, #1e1408);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  margin-bottom: 0;
+}
+
+/* candle drip holder */
+.sconce-holder {
+  width: 14px; height: 5px;
+  background: linear-gradient(180deg, #2a1e08, #1a1206);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.sconce-body {
+  width: 9px; height: 48px;
+  background: linear-gradient(180deg,
+    #f5f0e0 0%, #e8dca0 20%, #d4c870 60%, #c0aa40 100%
+  );
+  border-radius: 3px 3px 1px 1px;
+  box-shadow:
+    inset 2px 0 4px rgba(255,255,255,0.3),
+    inset -2px 0 4px rgba(0,0,0,0.2),
+    0 0 4px rgba(200,150,40,0.3);
+  /* wax drip effect */
+  position: relative;
+}
+.sconce-body::before {
+  content: '';
+  position: absolute;
+  top: 30%; left: -1px;
+  width: 3px; height: 18px;
+  background: linear-gradient(180deg, transparent, #d4c060, #b89830);
+  border-radius: 0 0 3px 3px;
+  opacity: 0.7;
+}
+.sconce-body::after {
+  content: '';
+  position: absolute;
+  top: 20%; right: -1px;
+  width: 3px; height: 12px;
+  background: linear-gradient(180deg, transparent, #c8b040);
+  border-radius: 0 0 3px 3px;
+  opacity: 0.5;
+}
+
+.sconce-flame {
+  width: 8px; height: 18px;
+  margin-bottom: -3px;
+  position: relative;
+  animation: flicker 1.6s ease-in-out infinite alternate;
+}
+.sconce-flame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 85%,
+    #fff8e0 0%, #ffe060 20%, #ff9900 55%, transparent 100%
+  );
+  border-radius: 50% 50% 30% 30% / 60% 60% 40% 40%;
+}
+/* inner bright core */
+.sconce-flame::after {
+  content: '';
+  position: absolute;
+  bottom: 2px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 8px;
+  background: radial-gradient(ellipse, #fffce0 0%, #fff0a0 60%, transparent 100%);
+  border-radius: 50%;
+}
+
+@keyframes flicker {
+  0%   { transform: scaleX(1)    scaleY(1)    rotate(-1.5deg); filter: brightness(0.95); }
+  20%  { transform: scaleX(0.88) scaleY(1.08) rotate(2deg);    filter: brightness(1.05); }
+  45%  { transform: scaleX(1.06) scaleY(0.94) rotate(-2deg);   filter: brightness(0.9); }
+  70%  { transform: scaleX(0.92) scaleY(1.06) rotate(1.5deg);  filter: brightness(1.08); }
+  100% { transform: scaleX(0.95) scaleY(1.04) rotate(-1deg);   filter: brightness(0.97); }
+}
+
+/* 烛光体积光晕 — 多层叠加 */
+.sconce-glow {
+  position: absolute;
+  top: -60px; left: 50%; transform: translateX(-50%);
+  pointer-events: none;
+}
+/* 近距强光 */
+.sconce-glow::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 100px; height: 100px;
+  background: radial-gradient(ellipse 50% 60% at 50% 40%,
+    rgba(255,210,80,0.22) 0%,
+    rgba(255,160,30,0.10) 40%,
+    transparent 75%
+  );
+  animation: flicker 1.6s ease-in-out infinite alternate;
+}
+/* 远距漫射 */
+.sconce-glow::after {
+  content: '';
+  position: absolute;
+  top: -20px; left: 50%; transform: translateX(-50%);
+  width: 180px; height: 200px;
+  background: radial-gradient(ellipse 50% 55% at 50% 35%,
+    rgba(255,180,40,0.08) 0%,
+    rgba(200,100,20,0.04) 50%,
+    transparent 80%
+  );
+  animation: flicker 2.1s ease-in-out infinite alternate-reverse;
+}
+
+/* 烛光在墙上的投射（左右各一） */
+.candle-wall-light {
+  position: absolute; top: 0; bottom: 0;
+  width: 22vw; pointer-events: none; z-index: 2;
+}
+.candle-wall-light.left {
+  left: 0;
+  background: radial-gradient(
+    ellipse 90% 60% at 85% 22%,
+    rgba(255,180,60,0.09) 0%,
+    rgba(200,120,30,0.04) 50%,
+    transparent 75%
+  );
+  animation: wall-flicker-l 1.7s ease-in-out infinite alternate;
+}
+.candle-wall-light.right {
+  right: 0;
+  background: radial-gradient(
+    ellipse 90% 60% at 15% 22%,
+    rgba(255,180,60,0.09) 0%,
+    rgba(200,120,30,0.04) 50%,
+    transparent 75%
+  );
+  animation: wall-flicker-r 1.9s ease-in-out infinite alternate;
+}
+@keyframes wall-flicker-l {
+  0%,100% { opacity: 0.8; transform: scaleX(1); }
+  50%     { opacity: 1;   transform: scaleX(1.05); }
+}
+@keyframes wall-flicker-r {
+  0%,100% { opacity: 0.9; transform: scaleX(1); }
+  40%     { opacity: 0.7; transform: scaleX(0.96); }
+}
+
+/* 烛光地面光斑 */
+.candle-floor-glow {
+  position: absolute; bottom: 0;
+  width: 22vw; height: 25vh; pointer-events: none; z-index: 2;
+}
+.candle-floor-glow.left {
+  left: 0;
+  background: radial-gradient(
+    ellipse 80% 50% at 70% 80%,
+    rgba(255,160,40,0.06) 0%, transparent 70%
+  );
+}
+.candle-floor-glow.right {
+  right: 0;
+  background: radial-gradient(
+    ellipse 80% 50% at 30% 80%,
+    rgba(255,160,40,0.06) 0%, transparent 70%
+  );
+}
+
+/* ─── AMBIENT CEILING LIGHT ───────────────── */
+#layer-light {
+  position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  background:
+    radial-gradient(ellipse 50% 28% at 50% 0%,
+      rgba(255,200,80,0.1) 0%, transparent 70%
+    );
+}
+
+/* ─── MAIN SCREEN ─────────────────────────── */
+/* 屏幕外部框架 — 金属/木质镶嵌感 */
+#screen-outer-frame {
+  position: relative; z-index: 10;
+  width: calc(56vw + 28px); max-width: 808px;
+  height: calc(80vh + 28px);
+  background: linear-gradient(145deg,
+    #2e2410 0%, #1e1808 30%, #281e0c 60%, #1a1406 100%
+  );
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px rgba(180,140,50,0.25),
+    0 0 0 2px rgba(0,0,0,0.8),
+    0 20px 60px rgba(0,0,0,0.8),
+    0 40px 100px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,220,100,0.15),
+    inset 0 -1px 0 rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  filter: url(#wood-noise);
+}
+/* frame 内边装饰 */
+#screen-outer-frame::before {
+  content: '';
+  position: absolute; inset: 6px;
+  border: 1px solid rgba(180,140,50,0.1);
+  border-radius: 3px;
+  pointer-events: none;
+}
+/* frame 角落铆钉感 */
+#screen-outer-frame::after {
+  content: '';
+  position: absolute; inset: 10px;
+  border: 1px solid rgba(0,0,0,0.4);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+#confessional-screen {
+  position: relative;
+  width: 56vw; max-width: 780px;
+  height: 80vh;
+  display: flex; flex-direction: column;
+  align-items: center;
+  /* 屏幕玻璃基底 */
+  background: linear-gradient(165deg,
+    #0d1018 0%, #090c14 40%, #070810 70%, #050608 100%
+  );
+  border-radius: 3px;
+  overflow: hidden;
+  /* 玻璃边缘高光 */
+  box-shadow:
+    inset 0 0 60px rgba(0,0,0,0.7),
+    inset 0 0 0 1px rgba(100,140,200,0.15),
+    0 0 40px rgba(60,100,180,0.12),
+    0 0 80px rgba(40,70,140,0.06);
+}
+
+/* CRT 扫描线 */
+#confessional-screen::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 100; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px, transparent 2px,
+    rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 3px
+  );
+}
+
+/* 玻璃高光反射 — 左上到右上斜向光带 */
+#confessional-screen::after {
+  content: '';
+  position: absolute; z-index: 102; pointer-events: none;
+  top: 0; left: -20%; right: -20%; height: 40%;
+  background: linear-gradient(
+    165deg,
+    rgba(255,255,255,0.0) 0%,
+    rgba(200,220,255,0.04) 30%,
+    rgba(180,200,255,0.06) 45%,
+    rgba(200,220,255,0.03) 60%,
+    transparent 75%
+  );
+  border-radius: 3px 3px 0 0;
+  transform-origin: top left;
+}
+
+/* 屏幕外框 bezel */
+.screen-bezel {
+  position: absolute; inset: 0;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 0 1px rgba(100,140,200,0.08),
+    inset 0 0 20px rgba(0,0,0,0.4);
+  pointer-events: none; z-index: 99;
+}
+
+/* 屏幕底部微弱蓝紫色地面反光 */
+.screen-floor-reflection {
+  position: absolute;
+  bottom: -14vh; left: 50%; transform: translateX(-50%);
+  width: 56vw; max-width: 780px;
+  height: 14vh;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgba(60,100,200,0.08) 0%, transparent 70%
+  );
+  pointer-events: none; z-index: 9;
+}
+
+/* ─── CAMERA DOT ─────────────────────────── */
+#camera-dot {
+  position: absolute; top: 14px; right: 18px; z-index: 110;
+  width: 8px; height: 8px;
+  background: #cc2200; border-radius: 50%;
+  box-shadow: 0 0 6px rgba(200,30,0,0.8);
+  animation: cam-blink 3.2s ease-in-out infinite;
+}
+@keyframes cam-blink {
+  0%,45%  { opacity: 1; }
+  50%,95% { opacity: 0.15; }
+  100%    { opacity: 1; }
+}
+
+/* ─── PHASES ─────────────────────────────── */
+.phase {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 48px 52px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+.phase.active { opacity: 1; pointer-events: all; }
+
+/* ── PHASE 1: BAIT ── */
+#phase-bait { gap: 28px; }
+
+.cross-symbol {
+  font-size: 28px; color: rgba(180,140,60,0.6);
+  letter-spacing: 8px;
+  animation: cross-breathe 4s ease-in-out infinite;
+}
+@keyframes cross-breathe {
+  0%,100% { opacity: 0.4; }
+  50%     { opacity: 0.8; }
+}
+
+.bait-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(16px, 2.2vw, 26px);
+  color: rgba(200,180,130,0.85);
+  letter-spacing: 5px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.bait-subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: clamp(13px, 1.4vw, 17px);
+  color: rgba(160,140,100,0.6);
+  text-align: center;
+  line-height: 1.9;
+  max-width: 380px;
+}
+
+.bait-divider {
+  width: 120px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(180,140,60,0.4), transparent);
+}
+
+.begin-btn {
+  margin-top: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 13px; letter-spacing: 4px;
+  color: rgba(160,140,100,0.7);
+  background: none; border: none;
+  padding: 12px 32px;
+  border: 1px solid rgba(180,140,60,0.2);
+  cursor: pointer;
+  transition: all 0.4s;
+  position: relative; overflow: hidden;
+}
+.begin-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(180,140,60,0.05);
+  transform: translateX(-100%);
+  transition: transform 0.4s;
+}
+.begin-btn:hover::before { transform: translateX(0); }
+.begin-btn:hover {
+  color: rgba(200,180,130,0.95);
+  border-color: rgba(180,140,60,0.45);
+  box-shadow: 0 0 20px rgba(180,140,60,0.08);
+}
+
+/* ── PHASE 2: CONFESSION ── */
+#phase-confession { gap: 20px; justify-content: flex-start; padding-top: 52px; }
+
+.conf-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px; letter-spacing: 5px;
+  color: rgba(100,140,200,0.5);
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+.conf-prompt {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: clamp(14px, 1.5vw, 18px);
+  color: rgba(180,160,120,0.75);
+  line-height: 1.8;
+  align-self: flex-start;
+}
+
+#conf-textarea {
+  width: 100%; flex: 1;
+  background: rgba(10,12,20,0.6);
+  border: none;
+  border-bottom: 1px solid rgba(100,140,200,0.2);
+  color: rgba(200,210,230,0.85);
+  font-family: 'IM Fell English', serif;
+  font-size: clamp(14px, 1.5vw, 18px);
+  line-height: 1.85;
+  resize: none; outline: none;
+  padding: 16px 0;
+  caret-color: rgba(100,140,200,0.7);
+  transition: border-color 0.3s;
+}
+#conf-textarea::placeholder {
+  color: rgba(100,120,160,0.25);
+  font-style: italic;
+}
+#conf-textarea:focus { border-bottom-color: rgba(100,140,200,0.45); }
+
+/* waveform / listening indicator */
+#waveform {
+  width: 100%; height: 32px;
+  display: flex; align-items: center; gap: 3px;
+  opacity: 0; transition: opacity 0.5s;
+}
+#waveform.active { opacity: 1; }
+.wave-bar {
+  flex: 1; border-radius: 2px;
+  background: rgba(100,140,200,0.3);
+  animation: wave-anim 1.2s ease-in-out infinite;
+}
+@keyframes wave-anim {
+  0%,100% { height: 4px; }
+  50%     { height: 20px; }
+}
+
+.conf-meta {
+  display: flex; justify-content: space-between; width: 100%;
+  font-family: 'Courier Prime', monospace;
+  font-size: 11px;
+  color: rgba(100,120,160,0.35);
+}
+
+.submit-btn {
+  align-self: flex-end;
+  font-family: 'Cinzel', serif;
+  font-size: 11px; letter-spacing: 4px;
+  color: rgba(100,140,200,0.6);
+  background: none;
+  border: 1px solid rgba(100,140,200,0.2);
+  padding: 10px 28px; cursor: pointer;
+  transition: all 0.35s;
+}
+.submit-btn:hover {
+  color: rgba(140,180,240,0.9);
+  border-color: rgba(100,140,200,0.5);
+  box-shadow: 0 0 20px rgba(80,120,200,0.08);
+}
+.submit-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── PHASE 3: GLITCH ── */
+#phase-glitch { gap: 0; background: #060708; }
+
+#glitch-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+
+.glitch-text {
+  position: relative; z-index: 5;
+  font-family: 'Courier Prime', monospace;
+  font-size: clamp(10px, 1.1vw, 13px);
+  color: rgba(100,200,120,0.7);
+  text-align: left; width: 100%;
+  padding: 0 52px;
+  line-height: 1.9;
+  animation: glitch-flicker 0.15s infinite;
+}
+@keyframes glitch-flicker {
+  0%,94% { opacity: 1; transform: translate(0); }
+  95%    { opacity: 0.8; transform: translate(-2px, 1px); }
+  96%    { opacity: 1; transform: translate(2px, -1px); }
+  97%    { opacity: 0.9; transform: translate(0); }
+}
+
+.glitch-price {
+  position: relative; z-index: 5;
+  font-family: 'Courier Prime', monospace;
+  font-size: clamp(28px, 4vw, 52px);
+  color: rgba(200,240,120,0.9);
+  letter-spacing: 4px;
+  text-shadow: 0 0 20px rgba(150,220,80,0.4), 2px 0 rgba(255,0,100,0.3), -2px 0 rgba(0,200,255,0.3);
+}
+
+/* ── PHASE 4: SETTLEMENT ── */
+#phase-settlement { gap: 24px; justify-content: flex-start; padding-top: 44px; overflow-y: auto; }
+
+.settle-from {
+  font-family: 'Cinzel', serif;
+  font-size: 10px; letter-spacing: 5px;
+  color: rgba(100,140,200,0.45);
+  align-self: flex-start;
+}
+
+.settle-absolution {
+  font-family: 'IM Fell English', serif;
+  font-size: clamp(14px, 1.6vw, 19px);
+  color: rgba(200,210,230,0.85);
+  line-height: 1.95;
+  text-align: left;
+  align-self: flex-start;
+  min-height: 80px;
+}
+/* typing cursor */
+.settle-absolution::after {
+  content: '|';
+  animation: cursor-blink 0.9s step-end infinite;
+  color: rgba(100,140,200,0.5);
+}
+@keyframes cursor-blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+.settle-divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(100,140,200,0.2), transparent);
+  align-self: stretch;
+}
+
+/* ── PRINTER ── */
+#printer-wrap {
+  align-self: flex-end; position: relative;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+#printer-wrap:hover { transform: translateY(-2px); }
+#printer-wrap:hover .printer-hint { opacity: 1; }
+
+.printer-body {
+  width: 90px; height: 52px;
+  background: linear-gradient(160deg, #1e2228, #141820);
+  border: 1px solid rgba(100,140,200,0.2);
+  border-radius: 5px;
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+.printer-slot {
+  width: 60px; height: 4px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 1px; margin-bottom: 8px;
+  position: relative; overflow: visible;
+}
+.printer-led {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 5px; height: 5px; background: #00cc66; border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0,200,80,0.6);
+  animation: led-pulse 2s ease-in-out infinite;
+}
+@keyframes led-pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+.printer-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 8px; color: rgba(100,140,200,0.4);
+  letter-spacing: 2px;
+}
+
+.printer-hint {
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  font-family: 'Cinzel', serif; font-size: 9px;
+  color: rgba(100,140,200,0.6); letter-spacing: 2px;
+  white-space: nowrap; opacity: 0; transition: opacity 0.3s;
+}
+
+/* ── RECEIPT PAPER ── */
+#receipt-paper {
+  position: absolute;
+  bottom: 52px; left: 50%; transform: translateX(-50%);
+  width: 56px;
+  background: #f5f0e8;
+  border-radius: 0 0 2px 2px;
+  overflow: hidden;
+  height: 0; /* animated */
+  transition: height 0.05s linear;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* full receipt view */
+#receipt-modal {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s;
+}
+#receipt-modal.show { opacity: 1; pointer-events: all; }
+
+.receipt-sheet {
+  width: min(340px, 88vw);
+  background: #f5f0e8;
+  padding: 28px 24px 36px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 12px;
+  color: #1a1208;
+  line-height: 2;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  /* torn top edge */
+  border-radius: 0 0 3px 3px;
+  animation: receipt-slide 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes receipt-slide {
+  from { transform: translateY(-30px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.receipt-sheet::before {
+  content: '';
+  position: absolute; top: -8px; left: 0; right: 0; height: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    #f5f0e8 0px, #f5f0e8 8px,
+    transparent 8px, transparent 12px
+  );
+}
+
+.receipt-header { text-align: center; margin-bottom: 16px; }
+.receipt-title { font-size: 14px; font-weight: bold; letter-spacing: 3px; }
+.receipt-sep { border: none; border-top: 1px dashed #8a7a60; margin: 10px 0; }
+.receipt-row { display: flex; justify-content: space-between; }
+.receipt-row.total { font-weight: bold; font-size: 14px; margin-top: 8px; }
+.receipt-footer { text-align: center; margin-top: 16px; font-size: 10px; color: #6a5a40; line-height: 1.7; }
+.receipt-barcode {
+  width: 100%; height: 30px; margin: 14px 0 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    #1a1208 0px, #1a1208 2px,
+    transparent 2px, transparent 4px,
+    #1a1208 4px, #1a1208 5px,
+    transparent 5px, transparent 8px
+  );
+}
+
+.close-receipt {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none; font-size: 16px;
+  color: #6a5a40; cursor: pointer;
+}
+
+/* ─── RESET BUTTON ───────────────────────── */
+.reset-btn {
+  align-self: center; margin-top: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px; letter-spacing: 4px;
+  color: rgba(100,140,200,0.35);
+  background: none;
+  border: 1px solid rgba(100,140,200,0.1);
+  padding: 8px 22px; cursor: pointer;
+  transition: all 0.35s;
+}
+.reset-btn:hover {
+  color: rgba(140,180,240,0.6);
+  border-color: rgba(100,140,200,0.3);
+}
+
+/* ─── HIDDEN ADMIN TRIGGER ───────────────── */
+#admin-trigger {
+  position: fixed; bottom: 22px; right: 22px;
+  width: 28px; height: 28px; z-index: 50;
+  cursor: pointer; opacity: 0.06;
+  transition: opacity 0.3s;
+  font-size: 18px;
+  color: rgba(100,140,200,0.6);
+  display: flex; align-items: center; justify-content: center;
+  font-family: serif;
+  user-select: none;
+}
+#admin-trigger:hover { opacity: 0.3; }
+
+/* ─── ADMIN PANEL ────────────────────────── */
+#admin-panel {
+  position: fixed; inset: 0; z-index: 300;
+  background: #040608;
+  display: none; flex-direction: column;
+  font-family: 'Courier Prime', monospace;
+  overflow: hidden;
+  isolation: isolate;
+}
+#admin-panel.show { display: flex; }
+
+.admin-header {
+  padding: 18px 28px;
+  border-bottom: 1px solid rgba(100,140,200,0.15);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.admin-title {
+  font-family: 'Cinzel', serif;
+  font-size: 12px; letter-spacing: 5px;
+  color: rgba(100,140,200,0.6);
+}
+.admin-close {
+  background: none; border: 1px solid rgba(100,140,200,0.2);
+  color: rgba(100,140,200,0.5); font-family: 'Courier Prime', monospace;
+  font-size: 11px; padding: 5px 14px; cursor: pointer; letter-spacing: 2px;
+}
+.admin-close:hover { border-color: rgba(100,140,200,0.5); color: rgba(140,180,240,0.8); }
+
+.admin-stats {
+  display: flex; gap: 40px; padding: 16px 28px;
+  border-bottom: 1px solid rgba(100,140,200,0.08);
+}
+.stat-block { display: flex; flex-direction: column; gap: 4px; }
+.stat-label { font-size: 9px; letter-spacing: 3px; color: rgba(100,140,200,0.35); }
+.stat-val   { font-size: 22px; color: rgba(140,200,140,0.8); }
+
+.admin-table-wrap { flex: 1; overflow-y: auto; padding: 20px 28px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  text-align: left; padding: 8px 12px;
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px;
+  color: rgba(100,140,200,0.4);
+  border-bottom: 1px solid rgba(100,140,200,0.1);
+}
+td {
+  padding: 10px 12px;
+  color: rgba(180,190,210,0.7);
+  border-bottom: 1px solid rgba(100,140,200,0.05);
+  vertical-align: top;
+  font-size: 11px; line-height: 1.6;
+}
+td.text-col { max-width: 300px; color: rgba(200,210,230,0.85); }
+td.price-col { color: rgba(140,200,140,0.8); font-weight: bold; }
+td.tag-col { color: rgba(200,160,100,0.7); }
+tr:hover td { background: rgba(100,140,200,0.03); }
+
+.admin-empty {
+  text-align: center; padding: 60px;
+  color: rgba(100,140,200,0.25); font-size: 12px; letter-spacing: 3px;
+}
+
+/* ─── GLITCH OVERLAY ─────────────────────── */
+#glitch-overlay {
+  position: fixed; inset: 0; z-index: 150;
+  pointer-events: none; opacity: 0;
+}
+#glitch-overlay.flash {
+  animation: glitch-flash 0.08s linear 3;
+}
+@keyframes glitch-flash {
+  0%   { opacity: 0; background: transparent; }
+  30%  { opacity: 1; background: rgba(0,30,80,0.4); }
+  60%  { opacity: 0.6; background: rgba(80,0,30,0.3); }
+  100% { opacity: 0; }
+}
+
+/* ─── AMBIENT PARTICLES ──────────────────── */
+#particles { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.particle {
+  position: absolute; border-radius: 50%;
+  background: rgba(180,150,60,0.3);
+  animation: float-up linear infinite;
+}
+@keyframes float-up {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 0.3; }
+  100% { transform: translateY(-60vh) translateX(var(--dx)) scale(0.3); opacity: 0; }
+}
+
+/* ─── SCROLLBAR ──────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(100,140,200,0.2); border-radius: 2px; }
+
+/* ─── LOADING ────────────────────────────── */
+#loading-msg {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px; letter-spacing: 3px;
+  color: rgba(100,140,200,0.35);
+  z-index: 110;
+}
+</style>
+</head>
+<body>
+
+<!-- SVG FILTERS for noise/texture -->
+<svg id="svg-filters" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Wood grain noise -->
+    <filter id="wood-noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65 0.02" numOctaves="3" seed="2" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply" result="blend"/>
+      <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+    </filter>
+    <!-- Stone wall noise -->
+    <filter id="stone-noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04 0.04" numOctaves="4" seed="8" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="overlay" result="blend"/>
+      <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- GLITCH FLASH OVERLAY -->
+<div id="glitch-overlay"></div>
+
+<!-- RECEIPT MODAL -->
+<div id="receipt-modal">
+  <div class="receipt-sheet" id="receipt-sheet">
+    <button class="close-receipt" onclick="closeReceipt()">✕</button>
+    <div class="receipt-header">
+      <div class="receipt-title">ALGORITHMIC CONFESSIONAL</div>
+      <div style="font-size:10px;letter-spacing:2px;margin-top:4px;color:#6a5a40">TRANSACTION RECORD</div>
+    </div>
+    <hr class="receipt-sep">
+    <div id="receipt-body"></div>
+    <div class="receipt-barcode"></div>
+    <div class="receipt-footer" id="receipt-footer"></div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <div class="admin-title">BACKEND — DATA COLLECTION INTERFACE</div>
+    <button class="admin-close" onclick="closeAdmin()">[ CLOSE ]</button>
+  </div>
+  <div class="admin-stats">
+    <div class="stat-block">
+      <div class="stat-label">TOTAL CONFESSIONS</div>
+      <div class="stat-val" id="stat-total">—</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-label">TOTAL VALUE EXTRACTED</div>
+      <div class="stat-val" id="stat-value">—</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-label">AVG TYPING DURATION</div>
+      <div class="stat-val" id="stat-dur">—</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-label">MOST COMMON TAG</div>
+      <div class="stat-val" id="stat-tag" style="font-size:14px">—</div>
+    </div>
+  </div>
+  <div class="admin-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>TIME</th>
+          <th>CONFESSION TEXT</th>
+          <th>KEYWORDS</th>
+          <th>TAG</th>
+          <th>PRICE</th>
+          <th>WORDS</th>
+          <th>DURATION (s)</th>
+        </tr>
+      </thead>
+      <tbody id="admin-tbody">
+        <tr><td colspan="7" class="admin-empty">loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MAIN SCENE -->
+<div id="scene">
+  <!-- Background layers -->
+  <div id="layer-bg"></div>
+  <div id="layer-stone"></div>
+  <div id="particles"></div>
+
+  <!-- Booth structure -->
+  <div id="layer-booth">
+    <div class="booth-arch"></div>
+    <div class="booth-side left"></div>
+    <div class="booth-side right"></div>
+
+    <!-- Candle wall light projections -->
+    <div class="candle-wall-light left"></div>
+    <div class="candle-wall-light right"></div>
+    <div class="candle-floor-glow left"></div>
+    <div class="candle-floor-glow right"></div>
+
+    <div class="booth-lattice left">
+      <div class="lattice-bar"></div><div class="lattice-bar"></div>
+      <div class="lattice-bar"></div><div class="lattice-bar"></div>
+      <div class="lattice-bar"></div><div class="lattice-bar"></div>
+      <div class="lattice-bar"></div><div class="lattice-bar"></div>
+      <div class="lattice-bar"></div>
+    </div>
+    <div class="booth-lattice right">
+      <div class="lattice-bar"></div><div class="lattice-bar"></div>
+      <div class="lattice-bar"></div><div class="lattice-bar"></div>
+      <div class="lattice-bar"></div><div class="lattice-bar"></div>
+      <div class="lattice-bar"></div><div class="lattice-bar"></div>
+      <div class="lattice-bar"></div>
+    </div>
+
+    <!-- Candles -->
+    <div class="sconce left">
+      <div class="sconce-glow"></div>
+      <div class="sconce-flame"></div>
+      <div class="sconce-holder"></div>
+      <div class="sconce-body"></div>
+      <div class="sconce-bracket"></div>
+    </div>
+    <div class="sconce right">
+      <div class="sconce-glow"></div>
+      <div class="sconce-flame"></div>
+      <div class="sconce-holder"></div>
+      <div class="sconce-body"></div>
+      <div class="sconce-bracket"></div>
+    </div>
+  </div>
+
+  <!-- Ambient ceiling light -->
+  <div id="layer-light"></div>
+
+  <!-- Screen floor reflection -->
+  <div class="screen-floor-reflection"></div>
+
+  <!-- Central screen with wooden outer frame -->
+  <div id="screen-outer-frame">
+    <div id="confessional-screen">
+      <div class="screen-bezel"></div>
+      <div id="camera-dot"></div>
+
+      <!-- Phase 1: Bait -->
+      <div class="phase active" id="phase-bait">
+        <div class="cross-symbol">✦ ✦ ✦</div>
+        <div class="bait-title">ALGORITHMIC<br>CONFESSIONAL</div>
+        <div class="bait-divider"></div>
+        <div class="bait-subtitle">
+          This space is safe.<br>
+          What you share here will be held<br>
+          with care and absolute discretion.
+        </div>
+        <div class="bait-divider"></div>
+        <button class="begin-btn" onclick="goToPhase('confession')">ENTER THE CONFESSIONAL</button>
+      </div>
+
+      <!-- Phase 2: Confession -->
+      <div class="phase" id="phase-confession">
+        <div class="conf-label">SESSION ACTIVE</div>
+        <div class="conf-prompt">
+          Speak what weighs upon you.<br>
+          There is no judgement here.
+        </div>
+        <textarea id="conf-textarea"
+          placeholder="Begin when you are ready..."
+          oninput="onType()"
+          onkeydown="onKeydown(event)">
+        </textarea>
+        <div id="waveform"></div>
+        <div class="conf-meta">
+          <span id="char-count">0 characters</span>
+          <span id="word-count">0 words</span>
+        </div>
+        <button class="submit-btn" id="submit-btn" onclick="submitConfession()" disabled>
+          SUBMIT CONFESSION
+        </button>
+      </div>
+
+      <!-- Phase 3: Glitch -->
+      <div class="phase" id="phase-glitch">
+        <canvas id="glitch-canvas"></canvas>
+        <div class="glitch-text" id="glitch-text"></div>
+        <div class="glitch-price" id="glitch-price"></div>
+      </div>
+
+      <!-- Phase 4: Settlement -->
+      <div class="phase" id="phase-settlement">
+        <div class="settle-from">SYSTEM RESPONSE</div>
+        <div class="settle-absolution" id="settle-absolution"></div>
+        <div class="settle-divider"></div>
+        <div id="settle-loading" style="font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:3px;color:rgba(100,140,200,0.35);padding:8px 0">
+          generating response...
+        </div>
+        <div id="printer-wrap" onclick="showReceipt()" style="display:none">
+          <div class="printer-hint">COLLECT YOUR RECEIPT</div>
+          <div class="printer-body">
+            <div class="printer-slot">
+              <div id="receipt-paper"></div>
+            </div>
+            <div class="printer-led"></div>
+            <div class="printer-label">MODEL AC-666</div>
+          </div>
+        </div>
+        <!-- Reset button -->
+        <button class="reset-btn" id="reset-btn" onclick="resetSession()" style="display:none">
+          NEW CONFESSION
+        </button>
+      </div>
+
+    </div><!-- end confessional-screen -->
+  </div><!-- end screen-outer-frame -->
+
+</div><!-- end scene -->
+
+<!-- Hidden admin trigger (bottom right corner symbol) -->
+<div id="admin-trigger" onclick="openAdmin()" title="">⌘</div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'https://aniutugqkowyqlrytomh.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuaXV0dWdxa293eXFscnl0b21oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODc3MDUsImV4cCI6MjA5Mjk2MzcwNX0.22T7fKuW7SKOAbMJl82Tt8ndVrdJQPIkLn6-OxZMdrk';
+const TABLE         = 'confessions';
+
+// ══════════════════════════════════════════
+// KEYWORD / PRICING ENGINE
+// ══════════════════════════════════════════
+const KW = {
+  GUILT:      { words:['guilty','guilt','ashamed','shame','regret','regretted','wrong','wronged','fault','blame','blamed','lied','lie','cheated','cheat','stole','stolen','steal','hurt','harmed','betrayed','betray'], weight:95 },
+  FEAR:       { words:['afraid','fear','scared','terrified','anxious','anxiety','panic','worried','worry','nervous','dread','dreading','phobia'], weight:80 },
+  GRIEF:      { words:['lost','loss','grief','grieving','mourning','death','died','miss','missing','gone','alone','lonely','loneliness','abandoned','abandon'], weight:85 },
+  DESIRE:     { words:['want','wanted','longing','obsessed','obsession','desire','craving','crave','addicted','addiction','fantasy','fantasise'], weight:70 },
+  CONFESSION: { words:['secret','confess','confession','admit','admitted','never told','told no one','hidden','hiding','hide','private','kept from'], weight:100 },
+  SHAME:      { words:['embarrassed','embarrassment','humiliated','humiliation','pathetic','worthless','failure','failed','disgusting','disgusted'], weight:90 },
+  ANGER:      { words:['hate','hated','hating','angry','anger','furious','resentment','resent','bitter','rage','violent','jealous','jealousy'], weight:75 },
+};
+
+function analyseText(text){
+  const lower = text.toLowerCase();
+  const words = lower.split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+  let hits = {}, totalWeight = 0, dominantTag = 'UNCLASSIFIED', dominantScore = 0;
+
+  for(const [tag, {words: kws, weight}] of Object.entries(KW)){
+    const found = kws.filter(k => lower.includes(k));
+    if(found.length){
+      hits[tag] = found;
+      const score = found.length * weight;
+      totalWeight += score;
+      if(score > dominantScore){ dominantScore = score; dominantTag = tag+'_SIGNAL'; }
+    }
+  }
+
+  // price formula: keyword weight + length density + diversity bonus
+  const allKeywords = Object.values(hits).flat();
+  const diversity = Object.keys(hits).length;
+  const density = Math.min(wordCount / 10, 8);
+  const basePrice = Math.round(
+    (totalWeight * 0.9 + density * 40 + diversity * 60 + wordCount * 1.2) * (0.85 + Math.random()*0.3)
+  );
+  const price = Math.max(10, Math.min(basePrice, 9999));
+
+  return {
+    keywords: allKeywords.slice(0,8).join(', ') || 'none detected',
+    price,
+    emotion_tag: dominantTag,
+    word_count: wordCount,
+  };
+}
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let typingStart = null;
+let currentData = {};
+let receiptAnimInterval = null;
+
+// ══════════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════════
+(function spawnParticles(){
+  const container = document.getElementById('particles');
+  for(let i=0;i<18;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 1 + Math.random()*2;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      bottom:${-5 + Math.random()*20}%;
+      --dx:${(Math.random()-0.5)*60}px;
+      animation-duration:${8+Math.random()*14}s;
+      animation-delay:${Math.random()*12}s;
+      opacity:0;
+    `;
+    container.appendChild(p);
+  }
+})();
+
+// ══════════════════════════════════════════
+// WAVEFORM BARS
+// ══════════════════════════════════════════
+(function buildWaveform(){
+  const wf = document.getElementById('waveform');
+  for(let i=0;i<28;i++){
+    const b = document.createElement('div');
+    b.className = 'wave-bar';
+    b.style.animationDelay = (i*0.045)+'s';
+    b.style.animationDuration = (0.8+Math.random()*0.8)+'s';
+    wf.appendChild(b);
+  }
+})();
+
+// ══════════════════════════════════════════
+// PHASE CONTROL
+// ══════════════════════════════════════════
+function goToPhase(id){
+  document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+  document.getElementById('phase-'+id).classList.add('active');
+  if(id==='confession') document.getElementById('conf-textarea').focus();
+}
+
+// ══════════════════════════════════════════
+// TYPING HANDLERS
+// ══════════════════════════════════════════
+function onType(){
+  const ta = document.getElementById('conf-textarea');
+  const text = ta.value.trim();
+  if(!typingStart && text.length > 0) typingStart = Date.now();
+
+  const words = text.split(/\s+/).filter(Boolean).length;
+  document.getElementById('char-count').textContent = text.length+' characters';
+  document.getElementById('word-count').textContent = words+' words';
+  document.getElementById('submit-btn').disabled = text.length < 10;
+  document.getElementById('waveform').classList.toggle('active', text.length > 0);
+}
+
+function onKeydown(e){
+  // Cmd/Ctrl+Enter to submit
+  if((e.metaKey||e.ctrlKey) && e.key==='Enter') submitConfession();
+}
+
+// ══════════════════════════════════════════
+// SUBMIT
+// ══════════════════════════════════════════
+async function submitConfession(){
+  const ta = document.getElementById('conf-textarea');
+  const text = ta.value.trim();
+  if(text.length < 10) return;
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'PROCESSING...';
+
+  const duration = typingStart ? Math.round((Date.now()-typingStart)/1000) : 0;
+  const analysis = analyseText(text);
+  currentData = { text, duration, ...analysis };
+
+  // Go to glitch phase
+  goToPhase('glitch');
+  runGlitch(analysis);
+
+  // Save to Supabase (async, don't block)
+  saveToSupabase({ text, duration, ...analysis });
+}
+
+// ══════════════════════════════════════════
+// GLITCH PHASE
+// ══════════════════════════════════════════
+function runGlitch(analysis){
+  const canvas = document.getElementById('glitch-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  // Flash overlay
+  const overlay = document.getElementById('glitch-overlay');
+  overlay.classList.add('flash');
+  setTimeout(()=>overlay.classList.remove('flash'), 300);
+
+  // Animated lines
+  const lines = [
+    `CONFESSION RECEIVED`,
+    `PARSING EMOTIONAL CONTENT...`,
+    `KEYWORDS: ${analysis.keywords}`,
+    `SENTIMENT ANALYSIS: ${analysis.emotion_tag}`,
+    `WORD COUNT: ${analysis.word_count}`,
+    `MARKET VALUATION IN PROGRESS...`,
+    `CROSS-REFERENCING 14 BROKERS...`,
+    `DATA PACKAGE PREPARED`,
+    `TRANSACTION AUTHORISED`,
+  ];
+
+  let lineIdx = 0;
+  const glitchEl = document.getElementById('glitch-text');
+  const priceEl  = document.getElementById('glitch-price');
+  glitchEl.textContent = '';
+  priceEl.textContent  = '';
+
+  // draw matrix rain on canvas
+  const cols = Math.floor(canvas.width/14);
+  const drops = Array(cols).fill(0).map(()=>Math.random()*canvas.height);
+  const chars = '0123456789ABCDEF∑∆∂∫ΩΨΦ⊕⊗░▒▓';
+
+  const matrixLoop = setInterval(()=>{
+    ctx.fillStyle = 'rgba(6,7,8,0.15)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = 'rgba(60,180,80,0.5)';
+    ctx.font = '11px Courier Prime, monospace';
+    drops.forEach((y,i)=>{
+      const ch = chars[Math.floor(Math.random()*chars.length)];
+      ctx.fillText(ch, i*14, y);
+      drops[i] = y > canvas.height && Math.random()>0.975 ? 0 : y+14;
+    });
+  }, 45);
+
+  // reveal lines one by one
+  const lineTimer = setInterval(()=>{
+    if(lineIdx < lines.length){
+      glitchEl.textContent += '> '+lines[lineIdx]+'\n';
+      lineIdx++;
+    } else {
+      clearInterval(lineTimer);
+      // show price with counter animation
+      let count = 0;
+      const target = analysis.price;
+      const priceTimer = setInterval(()=>{
+        count += Math.ceil(target/30);
+        if(count >= target){ count = target; clearInterval(priceTimer); }
+        priceEl.textContent = '£'+count.toLocaleString();
+      }, 40);
+
+      // move to settlement after 1.8s
+      setTimeout(()=>{
+        clearInterval(matrixLoop);
+        goToPhase('settlement');
+        generateAbsolution(currentData.text);
+      }, 1800);
+    }
+  }, 220);
+}
+
+// ══════════════════════════════════════════
+// GENERATE ABSOLUTION via Claude API
+// ══════════════════════════════════════════
+async function generateAbsolution(confessionText){
+  const el = document.getElementById('settle-absolution');
+  const loading = document.querySelector('#phase-settlement #loading-msg');
+  el.textContent = '';
+
+  const systemPrompt = `You are the voice of the Algorithmic Confessional — a system that absorbs human secrets and responds with warmth, absolution, and gentle encouragement. Your tone is compassionate, poetic, slightly formal, like a letter from someone who truly understands. You never mention data, algorithms, pricing, or technology. You speak only of the human heart. Keep your response to 3–4 sentences. Do not begin with "I".`;
+
+  const userPrompt = `Someone has just confessed the following: "${confessionText.slice(0,400)}"\n\nRespond with genuine compassion and absolution. Make them feel heard, forgiven, and less alone.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || fallbackAbsolution();
+    const loading = document.getElementById('settle-loading');
+    if(loading) loading.style.display = 'none';
+    typewriterEffect(el, text, ()=>{ showPrinter(); });
+  } catch(e) {
+    const loading = document.getElementById('settle-loading');
+    if(loading) loading.style.display = 'none';
+    typewriterEffect(el, fallbackAbsolution(), ()=>{ showPrinter(); });
+  }
+}
+
+function fallbackAbsolution(){
+  const responses = [
+    "What you carry is heavier than it should be for one person. That you have spoken it, even here, even now, is an act of courage. You are not defined by what weighs on you. You are defined by the fact that you still feel it.",
+    "The things we cannot say aloud grow heavier with each passing day. You have set something down. It does not disappear, but you are no longer holding it entirely alone. That is enough. That is more than enough.",
+    "There is no version of you that deserves to carry this without rest. What you have shared is real, and it has been heard. Whatever comes next, you are not beyond understanding — or forgiveness.",
+  ];
+  return responses[Math.floor(Math.random()*responses.length)];
+}
+
+// ══════════════════════════════════════════
+// TYPEWRITER
+// ══════════════════════════════════════════
+function typewriterEffect(el, text, onDone){
+  let i = 0;
+  el.textContent = '';
+  const t = setInterval(()=>{
+    el.textContent += text[i];
+    i++;
+    if(i >= text.length){
+      clearInterval(t);
+      if(onDone) onDone();
+    }
+  }, 28);
+}
+
+// ══════════════════════════════════════════
+// PRINTER
+// ══════════════════════════════════════════
+function showPrinter(){
+  const pw = document.getElementById('printer-wrap');
+  const lm = document.getElementById('settle-loading');
+  if(lm) lm.style.display = 'none';
+  pw.style.display = 'block';
+
+  // animate paper coming out
+  const paper = document.getElementById('receipt-paper');
+  let h = 0;
+  receiptAnimInterval = setInterval(()=>{
+    h += 2;
+    paper.style.height = h+'px';
+    if(h >= 40){
+      clearInterval(receiptAnimInterval);
+      // show reset button after printer done
+      const rb = document.getElementById('reset-btn');
+      if(rb) rb.style.display = 'block';
+    }
+  }, 40);
+}
+
+// ══════════════════════════════════════════
+// RESET SESSION
+// ══════════════════════════════════════════
+function resetSession(){
+  // clear state
+  typingStart = null;
+  currentData = {};
+  if(receiptAnimInterval) clearInterval(receiptAnimInterval);
+
+  // clear textarea
+  const ta = document.getElementById('conf-textarea');
+  ta.value = '';
+  document.getElementById('char-count').textContent = '0 characters';
+  document.getElementById('word-count').textContent = '0 words';
+  document.getElementById('waveform').classList.remove('active');
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('submit-btn').textContent = 'SUBMIT CONFESSION';
+
+  // clear settlement
+  document.getElementById('settle-absolution').textContent = '';
+  document.getElementById('printer-wrap').style.display = 'none';
+  document.getElementById('reset-btn').style.display = 'none';
+  document.getElementById('settle-loading').style.display = 'block';
+  document.getElementById('receipt-paper').style.height = '0';
+
+  // clear glitch
+  document.getElementById('glitch-text').textContent = '';
+  document.getElementById('glitch-price').textContent = '';
+
+  // go back to bait
+  goToPhase('bait');
+}
+
+function showReceipt(){
+  const d = currentData;
+  const modal = document.getElementById('receipt-modal');
+  const body  = document.getElementById('receipt-body');
+  const footer= document.getElementById('receipt-footer');
+
+  const now = new Date();
+  const sid = Math.random().toString(36).substr(2,8).toUpperCase();
+
+  body.innerHTML = `
+    <div class="receipt-row"><span>DATE</span><span>${now.toLocaleDateString('en-GB')}</span></div>
+    <div class="receipt-row"><span>TIME</span><span>${now.toLocaleTimeString('en-GB')}</span></div>
+    <div class="receipt-row"><span>SESSION ID</span><span>${sid}</span></div>
+    <hr class="receipt-sep">
+    <div class="receipt-row"><span>EMOTION TAG</span><span>${d.emotion_tag||'UNCLASSIFIED'}</span></div>
+    <div class="receipt-row"><span>KEYWORDS</span><span style="text-align:right;max-width:160px">${d.keywords||'—'}</span></div>
+    <div class="receipt-row"><span>WORD COUNT</span><span>${d.word_count||0}</span></div>
+    <div class="receipt-row"><span>BROKERS NOTIFIED</span><span>14</span></div>
+    <hr class="receipt-sep">
+    <div class="receipt-row total"><span>MARKET VALUE</span><span>£${(d.price||0).toLocaleString()}</span></div>
+  `;
+  footer.innerHTML = `
+    Thank you for your disclosure.<br>
+    Your data has been packaged and sold.<br>
+    <br>
+    By speaking, you have waived all rights<br>
+    to your internal silence.
+  `;
+
+  modal.classList.add('show');
+}
+
+function closeReceipt(){
+  document.getElementById('receipt-modal').classList.remove('show');
+}
+
+// close receipt on background click
+document.getElementById('receipt-modal').addEventListener('click', e=>{
+  if(e.target === document.getElementById('receipt-modal')) closeReceipt();
+});
+
+// ══════════════════════════════════════════
+// SUPABASE
+// ══════════════════════════════════════════
+async function saveToSupabase(data){
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        text:            data.text,
+        keywords:        data.keywords,
+        price:           data.price,
+        emotion_tag:     data.emotion_tag,
+        typing_duration: data.duration,
+        word_count:      data.word_count,
+      })
+    });
+  } catch(e) { console.warn('Supabase save failed:', e); }
+}
+
+async function fetchAllConfessions(){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=*&order=created_at.desc`, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+    }
+  });
+  return res.json();
+}
+
+// ══════════════════════════════════════════
+// ADMIN PANEL
+// ══════════════════════════════════════════
+async function openAdmin(){
+  document.getElementById('admin-panel').classList.add('show');
+  const tbody = document.getElementById('admin-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">loading...</td></tr>';
+
+  try {
+    const rows = await fetchAllConfessions();
+    if(!rows || !rows.length){
+      tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">NO DATA YET</td></tr>';
+      return;
+    }
+
+    // stats
+    const total = rows.length;
+    const totalVal = rows.reduce((s,r)=>s+(r.price||0),0);
+    const avgDur = Math.round(rows.reduce((s,r)=>s+(r.typing_duration||0),0)/total);
+    const tagCounts = {};
+    rows.forEach(r=>{ if(r.emotion_tag) tagCounts[r.emotion_tag]=(tagCounts[r.emotion_tag]||0)+1; });
+    const topTag = Object.entries(tagCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-value').textContent = '£'+totalVal.toLocaleString();
+    document.getElementById('stat-dur').textContent = avgDur+'s';
+    document.getElementById('stat-tag').textContent = topTag;
+
+    tbody.innerHTML = rows.map(r=>`
+      <tr>
+        <td>${new Date(r.created_at).toLocaleString('en-GB')}</td>
+        <td class="text-col">${escHtml(r.text||'')}</td>
+        <td>${escHtml(r.keywords||'—')}</td>
+        <td class="tag-col">${r.emotion_tag||'—'}</td>
+        <td class="price-col">£${(r.price||0).toLocaleString()}</td>
+        <td>${r.word_count||0}</td>
+        <td>${r.typing_duration||0}s</td>
+      </tr>
+    `).join('');
+  } catch(e){
+    tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">ERROR LOADING DATA</td></tr>';
+  }
+}
+
+function closeAdmin(){ document.getElementById('admin-panel').classList.remove('show'); }
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ══════════════════════════════════════════
+// AMBIENT SOUND (Web Audio API)
+// ══════════════════════════════════════════
+let audioCtx = null;
+function startAmbient(){
+  if(audioCtx) return;
+  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+
+  // Low hum — drone
+  const osc1 = audioCtx.createOscillator();
+  const g1   = audioCtx.createGain();
+  osc1.type = 'sine'; osc1.frequency.value = 55;
+  g1.gain.value = 0.04;
+  osc1.connect(g1); g1.connect(audioCtx.destination);
+  osc1.start();
+
+  // Slightly higher harmonic
+  const osc2 = audioCtx.createOscillator();
+  const g2   = audioCtx.createGain();
+  osc2.type = 'sine'; osc2.frequency.value = 110.3;
+  g2.gain.value = 0.018;
+  osc2.connect(g2); g2.connect(audioCtx.destination);
+  osc2.start();
+
+  // noise-like shimmer via fast LFO
+  const osc3 = audioCtx.createOscillator();
+  const g3   = audioCtx.createGain();
+  osc3.type = 'triangle'; osc3.frequency.value = 220.7;
+  g3.gain.value = 0.006;
+  osc3.connect(g3); g3.connect(audioCtx.destination);
+  osc3.start();
+}
+
+// start audio on first interaction
+document.addEventListener('click', startAmbient, { once: true });
+</script>
+</body>
+</html>
