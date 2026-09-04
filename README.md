@@ -18,7 +18,9 @@ What the user does not see: their words are simultaneously parsed for emotional 
 
 ## Experience
 
-<!-- INSERT: screenshot of Phase 1 Bait (entrance screen) -->
+<!-- INSERT: screenshot of Phase 1 Bait (entrance screen) -->![Uploading 截屏2026-09-04 13.01.25.png…]()
+<img width="1312" height="713" alt="截屏2026-09-04 13 00 29" src="https://github.com/user-attachments/assets/7e40c990-06af-4989-9c68-43ff8edb6352" />
+
 
 The work moves through four phases:
 
@@ -30,7 +32,14 @@ The work moves through four phases:
 | 4 | **Settlement** | AI-generated absolution, printer icon appears | Data written to database, Anthropic API called |
 
 <!-- INSERT: screenshot of Phase 3 Glitch -->
+<img width="1312" height="713" alt="截屏2026-09-04 13 01 48" src="https://github.com/user-attachments/assets/b99b9218-e911-4c24-b395-f2cc33b526e8" />
+<img width="1312" height="713" alt="截屏2026-09-04 13 02 40" src="https://github.com/user-attachments/assets/52eb0898-f8b7-467f-9285-376b17b6ecb0" />
+
+
 <!-- INSERT: screenshot of Phase 4 Settlement + receipt -->
+<img width="1312" height="713" alt="截屏2026-09-04 13 03 29" src="https://github.com/user-attachments/assets/8a369451-5752-4107-a140-0af9b191c348" />
+<img width="1312" height="713" alt="截屏2026-09-04 13 03 16" src="https://github.com/user-attachments/assets/3e3b093f-29fc-4433-b19c-c743e15dc7ab" />
+
 
 ---
 
